@@ -52,27 +52,30 @@ namespace Estadio.Data
         }
         private async Task AssignEntrancesToTickets()
         {
-            var tickets = await _context.Tikets.ToListAsync();
-            var entrances = await _context.EntranceGates.ToListAsync();
-
-            var random = new Random();
-            tickets = tickets.OrderBy(x => random.Next()).ToList();
-            entrances = entrances.OrderBy(x => random.Next()).ToList();
-
-            for (int i = 0; i < tickets.Count; i++)
+            if (!_context.EntranceGateTikets.Any())
             {
-                var ticket = tickets[i];
-                var entrance = entrances[i % entrances.Count];
+                var tickets = await _context.Tikets.ToListAsync();
+                var entrances = await _context.EntranceGates.ToListAsync();
 
-                ticket.EntranceGateTiket = new List<EntranceGateTiket>();
-                ticket.EntranceGateTiket.Add(new EntranceGateTiket
+                var random = new Random();
+                tickets = tickets.OrderBy(x => random.Next()).ToList();
+                entrances = entrances.OrderBy(x => random.Next()).ToList();
+
+                for (int i = 0; i < tickets.Count; i++)
                 {
-                    TicketId = ticket.Id,
-                    EntranceGateId = entrance.Id
-                });
-            }
+                    var ticket = tickets[i];
+                    var entrance = entrances[i % entrances.Count];
 
-            await _context.SaveChangesAsync();
+                    ticket.EntranceGateTiket = new List<EntranceGateTiket>();
+                    ticket.EntranceGateTiket.Add(new EntranceGateTiket
+                    {
+                        TicketId = ticket.Id,
+                        EntranceGateId = entrance.Id
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
